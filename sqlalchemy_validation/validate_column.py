@@ -1,8 +1,4 @@
 import sqlalchemy
-try:
-    import validate_email
-except:
-    pass
 
 from .error import *
 
@@ -32,12 +28,12 @@ def create_validate_column(column):
           The column's value.
 
         Raises:
-          NotNullError: Not Null Constraint
-          TypeError: Type Constraint
-          TooLongError, TooShortError: Length Consraint
-          RegExpError: RegExp Consraint
-          EmailError: Email Constraint
-          OverMinError, OverMaxError: Size Constraint
+          sqlalchemy_validation.NotNullError: Not Null Constraint
+          sqlalchemy_validation.InvalidTypeError: Type Constraint
+          sqlalchemy_validation.TooLongError, TooShortError: Length Consraint
+          sqlalchemy_validation.RegExpError: RegExp Consraint
+          sqlalchemy_validation.EmailError: Email Constraint
+          sqlalchemy_validation.OverMinError, OverMaxError: Size Constraint
         """
         # Not Null Constraint
         if value is None:
@@ -73,6 +69,7 @@ def create_validate_column(column):
 
                 # Format Constraint
                 if column.format == "email":
+                    import validate_email
                     if validate_email.validate_email(value):
                         raise EmailError(model, column, value)
 

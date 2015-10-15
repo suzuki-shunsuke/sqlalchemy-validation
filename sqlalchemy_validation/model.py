@@ -23,6 +23,8 @@ class Meta(DeclarativeMeta):
     """
 
     def __init__(cls, classname, bases, dict_):
+        """
+        """
         super(Meta, cls).__init__(classname, bases, dict_)
         if hasattr(cls, "__table__"):
             for column in cls.__table__.columns:
@@ -116,6 +118,13 @@ class Model(object):
 
     def __init__(self, **kwargs):
         """
+
+        Args:
+          kwargs:
+
+        Raises:
+          TypeError:
+          sqlalchemy_validation.ValidationError
         """
         cls_ = type(self)
         errors = []
@@ -126,10 +135,10 @@ class Model(object):
                     (column_name, cls_.__name__))
             try:
                 setattr(self, column_name, value)
-            except ValidationError as e:
+            except BaseValidationError as e:
                 errors.append(e)
         if errors:
-            raise MultiValidationError(errors)
+            raise ValidationError(errors)
 
     def __call__(self, **kwargs):
         """Sets kwargs to model's columns and returns self.
@@ -140,7 +149,8 @@ class Model(object):
           self
 
         Raises:
-          sqlalchemy_validation.Error
+          TypeError:
+          sqlalchemy_validation.ValidationError
         """
         self.__init__(**kwargs)
         return self
@@ -155,7 +165,7 @@ class Model(object):
           self
 
         Raises:
-          sqlalchemy_validation.Error
+          sqlalchemy_validation.ValidationError
         """
         table = self.__table__
         constraints = table.constraints
@@ -181,9 +191,9 @@ class Model(object):
                     _validate_primary(self, session, columns, extracted_values)
                 elif isinstance(constraint, UniqueConstraint):
                     _validate_unique(self, session, columns, extracted_values)
-            except ValidationError as e:
+            except BaseValidationError as e:
                 errors.append(e)
         if errors:
-            raise MultiValidationError(errors)
+            raise ValidationError(errors)
 
         return self

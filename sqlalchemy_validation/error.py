@@ -3,25 +3,25 @@
 """
 
 
-class ValidationError(Exception):
+class BaseValidationError(Exception):
     pass
 
 
-class MultiValidationError(Exception):
+class ValidationError(BaseValidationError):
     """
     """
     def __init__(self, errors):
         """
         """
         self.errors = errors
-        super(MultiValidationError, self).__init__()
+        super(ValidationError, self).__init__()
 
     def __str__(self):
         return ("The following validation errors have occured.\n\n"
                 "\n\n".join(str(error) for error in self.errors))
 
 
-class ConstraintError(ValidationError):
+class ConstraintError(BaseValidationError):
     """
     """
     def __init__(self, model, items):
@@ -60,7 +60,7 @@ class UniqueKeyError(ConstraintError):
         )
 
 
-class ValidatesError(ValidationError):
+class ValidatesError(BaseValidationError):
     """
     """
     def __init__(self, model, column, value):
