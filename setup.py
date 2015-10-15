@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="sqlalchemy_validation",
-    version="0.1.0-alpha",
+    version="0.2.0a0",
     packages=["sqlalchemy_validation"],
 
     # Project uses reStructuredText, so ensure that the docutils get
