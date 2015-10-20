@@ -4,6 +4,8 @@
 
 import sqlalchemy
 
+from .validate_column import ColumnValidator
+
 
 class Column(sqlalchemy.Column):
     """
@@ -42,3 +44,4 @@ class Column(sqlalchemy.Column):
                 self.length = (None, type_length)
             elif self.length[1] is None:
                 self.length = (self.length[0], type_length)
+        self.validator = ColumnValidator(self)

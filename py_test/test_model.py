@@ -6,7 +6,7 @@ from sqlalchemy.schema import PrimaryKeyConstraint, UniqueConstraint, \
 from sqlalchemy import ForeignKey
 import pytest
 
-from sqlalchemy_validation import Model, Column
+from .sqlalchemy_validation import Model, Column
 
 
 class User(Model):
