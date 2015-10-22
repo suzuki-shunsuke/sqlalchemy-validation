@@ -10,7 +10,7 @@ def set_attribute(column):
     return wrap
 
 
-def validate(Model):
+def validate_attribute(Model):
     table = Model.__table__
     columns = table.columns
     constraints = table.constraints

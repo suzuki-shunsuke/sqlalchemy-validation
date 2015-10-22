@@ -1,16 +1,24 @@
-import re
+import os
+import sys
 
-from sqlalchemy.dialects import mysql
-from sqlalchemy.schema import PrimaryKeyConstraint, UniqueConstraint, \
-    CheckConstraint
-from sqlalchemy import ForeignKey
 import pytest
 
-from .sqlalchemy_validation import Model, Column
+print(os.getcwd())
+print(__file__)
+
+sys.path.append(
+    os.path.join(os.path.dirname(__file__), '../sqlalchemy_validation')
+)
+print(sys.path)
+
+from sqlalchemy_validation import Model
+from error import *
+
+sys.path.pop()
 
 
 class User(Model):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
     # primary key
     name = Column(mysql.VARCHAR(20), primary_key=True)
     # length
@@ -43,7 +51,7 @@ class User(Model):
 
 
 class User2(Model):
-    __tablename__ = 'users2'
+    __tablename__ = 'user2'
     id = Column(mysql.INTEGER)
     name = Column(mysql.VARCHAR(20))
     pk = PrimaryKeyConstraint(id, name)
@@ -53,25 +61,8 @@ class User2(Model):
     uniques = UniqueConstraint(unique2, unique3)
 
 
-class Person(Model):
-    __tablename__ = 'person'
-    id = Column(mysql.INTEGER, primary_key=True)
-    name = Column(mysql.VARCHAR(20))
-    age = Column(mysql.INTEGER)
-    name2 = Column(mysql.VARCHAR(20), ForeignKey('users2.name'))
-    idx = Column(mysql.INTEGER, index=True)
-    check = Column(
-        mysql.INTEGER, CheckConstraint(r'check < 10', name='check_max_limit')
-    )
+class TestUser(object):
 
-    uniques = UniqueConstraint(name, age)
-    check2 = CheckConstraint(
-        r'age < 10 OR idx > 20',
-        name="age_max_and_idx_min"
-    )
-
-
-def test_model():
-    user = User()
-    user2 = User2()
-    person = Person()
+    def test_type_error(self):
+        with pytest.raises(InvalidTypeError):
+            user = User(name=1)
