@@ -1,5 +1,4 @@
 """
-
 """
 
 import sqlalchemy
@@ -35,9 +34,6 @@ class Column(sqlalchemy.Column):
         if "autoincrement" not in kwargs:
             kwargs["autoincrement"] = False
         super(Column, self).__init__(*args, **kwargs)
-        self.noneable = (self.nullable or self.server_default is not None or
-                         self.default is not None or self.autoincrement)
-
         type_length = getattr(self.type, "length", None)
         if type_length:
             if self.length is None:
@@ -45,3 +41,12 @@ class Column(sqlalchemy.Column):
             elif self.length[1] is None:
                 self.length = (self.length[0], type_length)
         self.validator = ColumnValidator(self)
+
+    @property
+    def noneable(self):
+        return (
+            self.nullable or
+            self.server_default is not None or
+            self.default is not None or
+            self.autoincrement
+        )

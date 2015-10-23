@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import as_declarative
 from sqlalchemy.ext.declarative.api import DeclarativeMeta
 
 from .error import BaseValidationError, ValidationError
-from .validate_attribute import validate as validate_attribute
+from .attribute import validate_attribute
 
 
 class Meta(DeclarativeMeta):

@@ -1,29 +1,22 @@
 """
 """
 
-from abc import ABCMeta
+from collections import UserDict
 
 
-class BaseValidationError(Exception, metaclass=ABCMeta):
+class BaseValidationError(Exception):
     pass
 
 
-class ValidationError(dict):
+class ValidationError(UserDict, BaseValidationError):
     pass
-
-
-BaseValidationError.register(ValidationError)
 
 
 class BeforeCommitError(BaseValidationError):
-    def __init__(new=None, dirty=None, deleted=None):
+    def __init__(self, new=None, dirty=None, deleted=None):
         self.new = new
         self.dirty = dirty
         self.deleted = deleted
-
-
-class SkipError(Exception):
-    pass
 
 
 class PrimaryKeyError(BaseValidationError):
@@ -143,6 +136,12 @@ class OverMinError(ValidatesError):
 class NotNullError(ValidatesError):
     """Not Null Constraint.
     """
+    def __init__(self, model, column):
+        self.model = model
+        self.column = column
+        self.model_name = model.__class__.__name__
+        super(ValidatesError, self).__init__()
+
     def __str__(self):
         return ("NotNullError!\n""{}.{} can't be None.").format(
             self.model_name, self.column.name

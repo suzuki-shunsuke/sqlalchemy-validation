@@ -18,7 +18,7 @@ class TableValidator(object):
 
         self.table = table
         self.columns = all_columns
-        self.column_names = column_names
+        self.column_names = all_columns.keys()
         self.primary_key = primary_key
         self.primary_columns = primary_columns
         self.unique_constraints = unique_constraints
@@ -28,17 +28,15 @@ class TableValidator(object):
         # Not Null Constraint
         if column_names is None:
             column_names = self.column_names
-        status = make_status(column_names)
         for column_name in column_names:
             column = self.columns[column_name]
             value = getattr(model, column_name)
             values[column_name] = value
             if value is None and not column.noneable:
-                error_columns.append(column)
                 errors[(column_name,)] = NotNullError(model, column)
                 error_columns.add(column_name)
 
-    def validate_primary(self, model, values, errors, error_columns,
+    def validate_primary(self, session, model, values, errors, error_columns,
                          column_names=None):
         if column_names is None:
             column_names = self.column_names
@@ -63,11 +61,11 @@ class TableValidator(object):
             errros[column_names] = PrimaryKeyError(model)
             error_columns.update(column_names)
 
-    def validate_unique(self, model, values, errors, error_columns,
+    def validate_unique(self, session, model, values, errors, error_columns,
                         column_names=None):
         if column_names is None:
             column_names = self.column_names
-        for constraint in self.unique_constraints:
+        for constraint in self.unique_constraints.values():
             criterions = []
             for column_name, column in constraint.columns.items():
                 if column_name in error_columns:
@@ -90,7 +88,7 @@ class TableValidator(object):
                             model, constraint)
                     error_columns.update(column_names)
 
-    def validate_insert(self, model, column_names=None):
+    def validate_insert(self, session, model, column_names=None):
         if column_names is None:
             column_names = self.column_names
         error_columns = set()

@@ -9,7 +9,7 @@ class sessionmaker(sa.orm.sessionmaker):
                  autoflush=True, autocommit=False, expire_on_commit=True,
                  info=None, tables={}, **kw):
         super(sessionmaker, self).__init__(
-            self, bind, class_, autoflush, autocommit,
+            bind, class_, autoflush, autocommit,
             expire_on_commit, info, **kw
         )
 
@@ -25,7 +25,7 @@ class sessionmaker(sa.orm.sessionmaker):
                 table = model.__table__
                 try:
                     validators[table.name].validate_insert(session, model)
-                except BaseValidator as e:
+                except ValidationError as e:
                     new_errors.append(e)
             # Before Update
             dirty_errors = []
@@ -33,20 +33,19 @@ class sessionmaker(sa.orm.sessionmaker):
                 table = model.__table__
                 try:
                     validators[table.name].validate_update(session, model)
-                except BaseValidator as e:
+                except ValidationError as e:
                     dirty_errors.append(e)
             # Before Delete
-            # deleted_errors = []
+            deleted_errors = []
             # for model in session.deleted:
             #     table = model.__table__
             #     try:
             #         validators[table.name].validate_delete(session, model)
-            #     except BaseValidator as e:
+            #     except ValidationError as e:
             #         deleted_errors.append(e)
-            if new_errors or dirty_errors deleted_errors:
+            if new_errors or dirty_errors or deleted_errors:
                 raise BeforeCommitError(new=new_errors, dirty=dirty_errors,
                                         deleted=deleted_errors)
-
             # Before Update
             # dirty
             # Primary Key Constraint

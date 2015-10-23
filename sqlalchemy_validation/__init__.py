@@ -17,3 +17,4 @@ class User(Base):
 from .model import Model
 from .column import Column
 from .error import *
+from .sessionmaker import sessionmaker
