@@ -5,3 +5,4 @@ env2
 *.egg-info
 dist
 .cache
+build
