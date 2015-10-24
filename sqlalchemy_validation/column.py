@@ -1,12 +1,19 @@
 """
-
 """
 
 import sqlalchemy
 
+from .validate_column import ColumnValidator
+
 
 class Column(sqlalchemy.Column):
     """
+    Attributes:
+      size: A tuple or None.
+      regexp: A re.RegexObject or None.
+      length: A tuple or None.
+      format: A str or None.
+      validator: A ColumnValidator instance.
     """
     def __init__(self, *args, **kwargs):
         """This constructor receive additional keyword arguments
@@ -33,12 +40,19 @@ class Column(sqlalchemy.Column):
         if "autoincrement" not in kwargs:
             kwargs["autoincrement"] = False
         super(Column, self).__init__(*args, **kwargs)
-        self.noneable = (self.nullable or self.server_default is not None or
-                         self.default is not None or self.autoincrement)
-
         type_length = getattr(self.type, "length", None)
         if type_length:
             if self.length is None:
                 self.length = (None, type_length)
             elif self.length[1] is None:
                 self.length = (self.length[0], type_length)
+        self.validator = ColumnValidator(self)
+
+    @property
+    def noneable(self):
+        return (
+            self.nullable or
+            self.server_default is not None or
+            self.default is not None or
+            self.autoincrement
+        )
