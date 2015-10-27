@@ -15,7 +15,11 @@ class ValidationError(UserDict, BaseValidationError):
     key: A tuple of column names.
     value: A BaseValidationError instance.
     """
-    pass
+
+    def __init__(self):
+        """
+        """
+        pass
 
 
 class ValidatesError(BaseValidationError):
