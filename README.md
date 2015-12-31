@@ -1,5 +1,5 @@
 # sqlalchemy-validation
-SQLAlchemy Validation Extension.
+SQLAlchemy Validation Library.
 
 ## About
 

@@ -47,12 +47,3 @@ class Column(sqlalchemy.Column):
             elif self.length[1] is None:
                 self.length = (self.length[0], type_length)
         self.validator = ColumnValidator(self)
-
-    @property
-    def noneable(self):
-        return (
-            self.nullable or
-            self.server_default is not None or
-            self.default is not None or
-            self.autoincrement
-        )

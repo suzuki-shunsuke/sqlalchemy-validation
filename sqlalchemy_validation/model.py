@@ -24,20 +24,19 @@ def _table_columns(constraint, table):
     )
 
 
-metadata=MetaData(naming_convention={
-        "table_columns": _table_columns,
-        "ix": "ix_%(table_columns)s",
-        "uq": "uq_%(table_columns)s",
-        "ck": "ck_%(table_name)s_%(constraint_name)s",
-        "fk": "fk_%(table_name)s__%(column_0_name)s__%(referred_table_name)s",
-        "pk": "pk_%(table_name)s"
+metadata = MetaData(naming_convention={
+    "table_columns": _table_columns,
+    "ix": "ix_%(table_columns)s",
+    "uq": "uq_%(table_columns)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s__%(column_0_name)s__%(referred_table_name)s",
+    "pk": "pk_%(table_name)s"
 })
 
 
 class BaseModel(object):
     """
     """
-
     def __init__(self, **kwargs):
         """
         Args:
@@ -77,4 +76,7 @@ class BaseModel(object):
         return self
 
 
-Model = declarative_base(cls=BaseModel, constructor=None, metaclass=MetaClass, metadata=metadata)
+Model = declarative_base(
+    cls=BaseModel, constructor=None, metaclass=MetaClass,
+    metadata=metadata
+)

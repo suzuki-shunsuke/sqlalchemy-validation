@@ -1,9 +1,0 @@
-{
-  "dialect": "mysql",
-  "driver": "pymysql",
-  "username": "root",
-  "password": "mysql",
-  "host": "0.0.0.0",
-  "port": "3307",
-  "database": "test"
-}

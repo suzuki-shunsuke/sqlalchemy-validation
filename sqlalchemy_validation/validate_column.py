@@ -11,9 +11,11 @@ class ColumnValidator(object):
         self.python_type = column.type.python_type
         validates = []
         validates.append(self.validate_type)
-        if isinstance(column.type, sqlalchemy.types.Enum):
+        if hasattr(column.type, "enums"):
             self.enums = column.type.enums
             validates.append(self.validate_enum)
+            self.validates = validates
+            return
         if self.python_type is str:
             length = getattr(column, "length", False)
             if length:
@@ -33,6 +35,9 @@ class ColumnValidator(object):
             self.size = size
             validates.append(self.validate_size)
         self.validates = validates
+        self.has_default = (column.server_default is not None and
+                            column.default is not None and
+                            column.autoincrement)
 
     def validate(self, model, value):
         """Validate the value when the model's column attribute is changed.
@@ -60,28 +65,34 @@ class ColumnValidator(object):
           sqlalchemy_validation.EmailError: Email Constraint
           sqlalchemy_validation.OverMinError, OverMaxError: Size Constraint
         """
+        column = self.column
         if value is None:
-            if self.column.noneable:
-                return
-            raise NotNullError(model, self.column)
+            return self.validate_not_none(model, value)
         for validate in self.validates:
             validate(model, value)
+        return value
+
+    def validate_not_none(self, model, value):
+        column = self.column
+        if value is None and not column.nullable and not self.has_default:
+            raise NotNullError(model, column)
+        return value
 
     def validate_enum(self, model, value):
-        '''Enum Constraint
-        '''
+        """Enum Constraint
+        """
         if value not in self.enums:
             raise EnumError(model, self.column, value)
 
     def validate_type(self, model, value):
-        '''Type Constraint
-        '''
+        """Type Constraint
+        """
         if not isinstance(value, self.python_type):
             raise InvalidTypeError(model, self.column, value)
 
     def validate_length(self, model, value):
-        '''Length Constraint
-        '''
+        """Length Constraint
+        """
         length = len(value)
         m, M = self.length
         if m and length < m:
@@ -90,21 +101,21 @@ class ColumnValidator(object):
             raise TooLongError(model, self.column, value)
 
     def validate_regexp(self, model, value):
-        '''RegExp Constraint
-        '''
+        """RegExp Constraint
+        """
         if self.regexp.match(value) is None:
             raise RegExpError(model, self.column, value)
 
     def validate_email(self, model, value):
-        '''Format Constraint
-        '''
+        """Format Constraint
+        """
         import validate_email
-        if validate_email.validate_email(value):
+        if not validate_email.validate_email(value):
             raise EmailError(model, self.column, value)
 
     def validate_size(self, model, value):
-        '''Size Constraint
-        '''
+        """Size Constraint
+        """
         m, M = self.size
         if m and value < m:
             raise OverMinError(model, self.column, value)
