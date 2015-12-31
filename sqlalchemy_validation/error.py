@@ -15,7 +15,6 @@ class ValidationError(UserDict, BaseValidationError):
     key: A tuple of column names.
     value: A BaseValidationError instance.
     """
-
     def __init__(self):
         """
         """
@@ -124,10 +123,7 @@ class NotNullError(ValidatesError):
           column: A Column instance.
           model_name: A Model name.
         """
-        self.model = model
-        self.column = column
-        self.model_name = model.__class__.__name__
-        super(ValidatesError, self).__init__()
+        super(NotNullError, self).__init__(model, column, None)
 
     def __str__(self):
         return ("NotNullError!\n""{}.{} can't be None.").format(

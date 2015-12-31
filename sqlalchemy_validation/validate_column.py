@@ -11,9 +11,11 @@ class ColumnValidator(object):
         self.python_type = column.type.python_type
         validates = []
         validates.append(self.validate_type)
-        if isinstance(column.type, sqlalchemy.types.Enum):
+        if hasattr(column.type, "enums"):
             self.enums = column.type.enums
             validates.append(self.validate_enum)
+            self.validates = validates
+            return
         if self.python_type is str:
             length = getattr(column, "length", False)
             if length:
@@ -60,28 +62,30 @@ class ColumnValidator(object):
           sqlalchemy_validation.EmailError: Email Constraint
           sqlalchemy_validation.OverMinError, OverMaxError: Size Constraint
         """
+        column = self.column
         if value is None:
-            if self.column.noneable:
+            if column.nullable or column.server_default is not None:
                 return
-            raise NotNullError(model, self.column)
+            raise NotNullError(model, column)
         for validate in self.validates:
             validate(model, value)
+        return value
 
     def validate_enum(self, model, value):
-        '''Enum Constraint
-        '''
+        """Enum Constraint
+        """
         if value not in self.enums:
             raise EnumError(model, self.column, value)
 
     def validate_type(self, model, value):
-        '''Type Constraint
-        '''
+        """Type Constraint
+        """
         if not isinstance(value, self.python_type):
             raise InvalidTypeError(model, self.column, value)
 
     def validate_length(self, model, value):
-        '''Length Constraint
-        '''
+        """Length Constraint
+        """
         length = len(value)
         m, M = self.length
         if m and length < m:
@@ -90,21 +94,21 @@ class ColumnValidator(object):
             raise TooLongError(model, self.column, value)
 
     def validate_regexp(self, model, value):
-        '''RegExp Constraint
-        '''
+        """RegExp Constraint
+        """
         if self.regexp.match(value) is None:
             raise RegExpError(model, self.column, value)
 
     def validate_email(self, model, value):
-        '''Format Constraint
-        '''
+        """Format Constraint
+        """
         import validate_email
         if validate_email.validate_email(value):
             raise EmailError(model, self.column, value)
 
     def validate_size(self, model, value):
-        '''Size Constraint
-        '''
+        """Size Constraint
+        """
         m, M = self.size
         if m and value < m:
             raise OverMinError(model, self.column, value)
