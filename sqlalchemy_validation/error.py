@@ -15,10 +15,17 @@ class ValidationError(UserDict, BaseValidationError):
     key: A tuple of column names.
     value: A BaseValidationError instance.
     """
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """
         """
-        pass
+        init_dict = kwargs.pop("init_dict_", {})
+        UserDict.__init__(self, dict=init_dict, **kwargs)
+        BaseValidationError.__init__(self, *args)
+
+    def __str__(self):
+        return "The following Errors have raised!\n\n{}".format(
+            "\n\n".join("{}\n{}".format(key, val) for key, val in self.items())
+        )
 
 
 class ValidatesError(BaseValidationError):

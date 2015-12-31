@@ -35,6 +35,9 @@ class ColumnValidator(object):
             self.size = size
             validates.append(self.validate_size)
         self.validates = validates
+        self.has_default = (column.server_default is not None and
+                            column.default is not None and
+                            column.autoincrement)
 
     def validate(self, model, value):
         """Validate the value when the model's column attribute is changed.
@@ -64,11 +67,15 @@ class ColumnValidator(object):
         """
         column = self.column
         if value is None:
-            if column.nullable or column.server_default is not None:
-                return
-            raise NotNullError(model, column)
+            return self.validate_not_none(model, value)
         for validate in self.validates:
             validate(model, value)
+        return value
+
+    def validate_not_none(self, model, value):
+        column = self.column
+        if value is None and not column.nullable and not self.has_default:
+            raise NotNullError(model, column)
         return value
 
     def validate_enum(self, model, value):
@@ -103,7 +110,7 @@ class ColumnValidator(object):
         """Format Constraint
         """
         import validate_email
-        if validate_email.validate_email(value):
+        if not validate_email.validate_email(value):
             raise EmailError(model, self.column, value)
 
     def validate_size(self, model, value):

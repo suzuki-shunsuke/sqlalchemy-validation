@@ -44,7 +44,8 @@ def convert_model_to_dict(model, *args, **kwargs):
       model: a model instance.
       *args: extracted column names.
       **kwargs:
-        kwargs[column_name]: column's default value. This takes preference over the default_ keyword.
+        kwargs[column_name]: column's default value.
+          This takes preference over the default_ keyword.
         default_: default value
         remove_empty_:
           If this is True, empty columns are ignored.
@@ -56,34 +57,44 @@ def convert_model_to_dict(model, *args, **kwargs):
 
     Examples:
       user = User()
-      user.asdict()  # {"id": None, "name": None, "age": None}
-      user.asdict("name")  # {"name": None}
-      user.asdict(name="foo")  # {"id": None, "name": "foo", "age": None}
-      user.asdict(default_="foo")  # {"id": "foo", "name": "foo", "age": "foo"}
-      user.asdict(remove_empty_=True)  # {}
-      user.asdict("name", id=1)  # {"id": 1, "name": None}
-      user.asdict("name", name="bar")  # {"name": "bar"}
-      user.asdict("name", default_="foo")  # {"name": "foo"}
-      user.asdict("name", remove_empty_=True)  # {}
-      user.asdict(name="foo", default_="bar")  # {"id": "bar", "name": "foo", "age": "bar"}
-      user.asdict(name="foo", remove_empty_=True)  # {"name": "foo"}
-      user.asdict(default_="foo", remove_empty_=True)  # {"id": "foo", "name": "foo", "age": "foo"}
-      user.asdict("name", id=1, default_="foo")  # {"id": 1, "name": "foo"}
-      user.asdict("name", id=1, remove_empty_=True)  # {"id": 1}
-      user.asdict(id=1, default_="foo", remove_empty_=True)  # {"id": 1, "name": "foo", "age": "foo"}
-      user.asdict("name", id=1, default_="foo", remove_empty_=True)  # {"id": 1, "name": "foo"}
+      convert_model_to_dict(user)  # {"id": None, "name": None, "age": None}
+      convert_model_to_dict(user, "name")  # {"name": None}
+      # {"id": None, "name": "foo", "age": None}
+      convert_model_to_dict(user, name="foo")
+      # {"id": "foo", "name": "foo", "age": "foo"}
+      convert_model_to_dict(user, default_="foo")
+      convert_model_to_dict(user, remove_empty_=True)  # {}
+      convert_model_to_dict(user, "name", id=1)  # {"id": 1, "name": None}
+      convert_model_to_dict(user, "name", name="bar")  # {"name": "bar"}
+      convert_model_to_dict(user, "name", default_="foo")  # {"name": "foo"}
+      convert_model_to_dict(user, "name", remove_empty_=True)  # {}
+      # {"id": "bar", "name": "foo", "age": "bar"}
+      convert_model_to_dict(user, name="foo", default_="bar")
+      # {"name": "foo"}
+      convert_model_to_dict(user, name="foo", remove_empty_=True)
+      # {"id": "foo", "name": "foo", "age": "foo"}
+      convert_model_to_dict(user, default_="foo", remove_empty_=True)
+      # {"id": 1, "name": "foo"}
+      convert_model_to_dict(user, "name", id=1, default_="foo")
+      # {"id": 1}
+      convert_model_to_dict(user, "name", id=1, remove_empty_=True)
+      # {"id": 1, "name": "foo", "age": "foo"}
+      convert_model_to_dict(user, id=1, default_="foo", remove_empty_=True)
+      # {"id": 1, "name": "foo"}
+      convert_model_to_dict(user, "name", id=1, default_="foo",
+                            remove_empty_=True)
     """
     remove_empty = kwargs.pop("remove_empty_", False)
     has_default = "default_" in kwargs
     default = kwargs.pop("default_", None)
-    column_names = self.__table__.c.keys()
-    model_vars = vars(self)
+    column_names = model.__table__.c.keys()
+    model_vars = vars(model)
 
     if has_default:
         # ignore remove_empty
         if args:
             ret = dict((key, model_vars.get(key, default))
-                        for key in args)
+                       for key in args)
             for key, val in kwargs.items():
                 ret[key] = model_vars.get(key, val)
             return ret
@@ -94,7 +105,7 @@ def convert_model_to_dict(model, *args, **kwargs):
         if remove_empty:
             if args:
                 ret = dict((key, model_vars[key])
-                            for key in args if key in model_vars)
+                           for key in args if key in model_vars)
                 for key, val in kwargs.items():
                     ret[key] = model_vars.get(key, val)
                 return ret
@@ -111,5 +122,7 @@ def convert_model_to_dict(model, *args, **kwargs):
                     ret[key] = model_vars.get(key, ret.get(key, default))
                 return ret
             else:
-                return dict((key, model_vars.get(key, kwargs.get(key, default)))
-                            for key in column_names)
+                return dict(
+                    (key, model_vars.get(key, kwargs.get(key, default)))
+                    for key in column_names
+                )

@@ -37,7 +37,6 @@ metadata = MetaData(naming_convention={
 class BaseModel(object):
     """
     """
-
     def __init__(self, **kwargs):
         """
         Args:
@@ -77,4 +76,7 @@ class BaseModel(object):
         return self
 
 
-Model = declarative_base(cls=BaseModel, constructor=None, metaclass=MetaClass, metadata=metadata)
+Model = declarative_base(
+    cls=BaseModel, constructor=None, metaclass=MetaClass,
+    metadata=metadata
+)
