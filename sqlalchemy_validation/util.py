@@ -2,23 +2,41 @@
 """
 
 
-def validate(Model, column_name, value):
-    """ Validate the value.
+def validate(Model, *args, **kwargs):
+    """ Validate values.
+    The validates function raises ValidtionError,
+    while the validate function raises ValidatesError.
+
+    If you want to know only if kwargs are valid or not,
+    you should use the validate function rather than the validates function
+    in terms of the efficiency.
+
+    If you validate only one pair of column name and value,
+    you can use positional arguments.
+
+    If you pass positional arguments, keyword arguments are ignored.
 
     Args:
       Model: A model class.
-      column_name: A column name.
-      value: A value.
+      *args: a column name and value.
+      **kwargs: pairs of the column name and value.
 
     Returns:
-      A value.
+      If you pass positional arguments,
+      keyword arguments are ignored and the value is returned.
+      If you pass keyword arguments, return a model instance.
 
     Raises:
       ValidatesError
     """
     model = Model()
-    setattr(model, column_name, value)
-    return getattr(model, column_name)
+    if len(args) >= 2:
+        column_name, value = args[:2]
+        setattr(model, column_name, value)
+        return getattr(model, column_name)
+    for column_name, value in kwargs.items():
+        setattr(model, column_name, value)
+    return model
 
 
 def validates(Model, **kwargs):
